@@ -11,7 +11,7 @@ def main():
     parser.add_argument('--epoch_count', type=int, help='Choose the epoch count', required=True)
     parser.add_argument('--output_path', type=str, help='Choose the output path', required=True)
 
-    parser.add_argument('--checkpoint_path', type=str, help='Choose the output path', default=None)
+    parser.add_argument('--checkpoint_path', type=str, help='Choose the checkpoint path', default=None)
 
     args = parser.parse_args()
 
@@ -21,7 +21,7 @@ def main():
 
 
 def create_network(checkpoint_path):
-    layers = []
+    layers = [FullyConnectedLayer, BatchNormalization, ReLU, FullyConnectedLayer, BatchNormalization, ReLU, FullyConnectedLayer]
     network = Network(layers)
     if checkpoint_path is not None:
         network.load(checkpoint_path)
