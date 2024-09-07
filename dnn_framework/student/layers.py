@@ -24,13 +24,14 @@ class FullyConnectedLayer(Layer):
         """
         Internal values that are not part of the trainable parameters, i.e. momentum
         """
-        return None
+        return {}
 
     def forward(self, x):
         """
         Forward pass of the network
         """
-        y = np.dot(self.weights, x.T) + self.biases
+        #print(f'Forward : Doing the fully connected:')
+        y = np.dot(x, self.weights.T) + self.biases.ravel()
         cache = x
 
         return y, cache
@@ -39,16 +40,18 @@ class FullyConnectedLayer(Layer):
         """
         Backward pass of the network
         """
-        dl_dx = np.dot(self.weights.T, output_grad)
-        dl_dw = np.dot(output_grad, cache)
-        dl_db = np.sum(output_grad, axis=1, keepdims=True)
+        #print(f'Backward : Doing the fully connected:')
+
+        dl_dx = np.dot(output_grad, self.weights)
+        dl_dw = np.dot(output_grad.T, cache)
+        dl_db = np.sum(output_grad, axis=0, keepdims=True)
 
         gradients= {
             'w': dl_dw,
             'b': dl_db
         }
 
-        return dl_dx.T, gradients
+        return dl_dx, gradients
 
 
 class BatchNormalization(Layer):
@@ -84,6 +87,8 @@ class BatchNormalization(Layer):
             return self._forward_evaluation(x)
 
     def _forward_training(self, x):
+        # Put the input data over one axis
+        #print(f'Forward : Doing the batch normalization')
         # Compute batch mean and variance
         batch_mean = np.mean(x, axis=0)
         batch_variance = np.var(x, axis=0)
@@ -112,6 +117,7 @@ class BatchNormalization(Layer):
         return y, None
 
     def backward(self, output_grad, cache):
+        #print(f'Backward : Doing the batch normalization')
         x, x_normalized, batch_mean, batch_variance = cache
 
         N = x.shape[0]
@@ -149,10 +155,10 @@ class Sigmoid(Layer):
     """
 
     def get_parameters(self):
-        return None
+        return {}
 
     def get_buffers(self):
-        return None
+        return {}
 
     def forward(self, x):
         y = 1 / (1 + np.exp(-x))
@@ -161,7 +167,7 @@ class Sigmoid(Layer):
     def backward(self, output_grad, cache):
         sigmoid_grad = output_grad * ((1 - cache) * cache)
 
-        return sigmoid_grad, cache
+        return sigmoid_grad, {}
 
 
 class ReLU(Layer):
@@ -174,14 +180,14 @@ class ReLU(Layer):
         There are no learnable parameters in ReLU activation function, so simply
         return an empty string.
         """
-        return None
+        return {}
 
     def get_buffers(self):
         """
         There are no trainable data for ReLU activation function, so simply
         return an empty string.
         """
-        raise None
+        return {}
 
     def forward(self, x):
         """
@@ -192,6 +198,7 @@ class ReLU(Layer):
 
         But not sure if we can use it for this class.
         """
+        #print(f'Forward : Doing the ReLU')
         output = []
 
         if x.ndim == 1:
@@ -222,6 +229,7 @@ class ReLU(Layer):
         """
         Apply the backward pass for the ReLU activation function.
         """
+        #print(f'Backward : Doing the ReLU')
         output = []
 
         if cache.ndim == 1:
@@ -245,4 +253,4 @@ class ReLU(Layer):
                         output_temp.append(temp)
                 output.append(output_temp)
 
-        return np.array(output), cache
+        return np.array(output), {}

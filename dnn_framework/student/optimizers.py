@@ -11,6 +11,9 @@ class SgdOptimizer(Optimizer):
         self.learning_rate = learning_rate
 
     def _step_parameter(self, parameter, parameter_grad, parameter_name):
+        #print(f'\nThe parameter value is: {parameter.shape}')
+        #print(f'The parameter_grad value is: {parameter_grad.shape}\n')
+
         updated_parameter = parameter - (self.learning_rate * parameter_grad)
 
         return updated_parameter
@@ -25,6 +28,10 @@ class SgdOptimizer(Optimizer):
         for param_name, param_value in self.parameters.items():
             # Get the corresponding gradient
             param_grad = parameter_grads[param_name]
+
+            #print(f'Teh param_name is: {param_name}')
+            #print(f'The param_value shape is: {param_value.shape}')
+            #print(f'The param_grad shape is: {param_grad.shape}')
 
             # Update the parameter using SGD
             self.parameters[param_name] = self._step_parameter(param_value, param_grad, param_name)
