@@ -22,6 +22,7 @@ class LayerTestCase(unittest.TestCase):
         self.assertTrue(test_layer_parameter_grad(FullyConnectedLayer(4, 10), (2, 4), 'b'))
 
     def test_batch_normalization_forward_training(self):
+        print(f'Testing the forward training batch normalization')
         layer = BatchNormalization(2)
         layer.get_parameters()['gamma'][:] = np.array([1, 2])
         layer.get_parameters()['beta'][:] = np.array([-1, 1])

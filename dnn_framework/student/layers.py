@@ -57,25 +57,90 @@ class BatchNormalization(Layer):
     """
 
     def __init__(self, input_count, alpha=0.1):
-        raise NotImplementedError()
+        # Learnable parameters:
+        self.gamma = np.ones((input_count,))
+        self.beta = np.zeros((input_count,))
+
+        # Buffers for running mean and variance : Inference
+        self.running_mean = np.zeros((input_count,))
+        self.running_variance = np.ones((input_count,))
+
+        # Momentum used for calculating mean and variance : Inference
+        self.alpha = alpha
+
+        # Flag to indicate whether the layer is in training mode or evaluation mode
+        self.is_training = True
 
     def get_parameters(self):
-        raise NotImplementedError()
+        return {'gamma': self.gamma, 'beta': self.beta}
 
     def get_buffers(self):
-        raise NotImplementedError()
+        return {'global_mean': self.running_mean, 'global_variance': self.running_variance}
 
     def forward(self, x):
-        raise NotImplementedError()
+        if self.is_training:
+            return self._forward_training(x)
+        else:
+            return self._forward_evaluation(x)
 
     def _forward_training(self, x):
-        raise NotImplementedError()
+        # Compute batch mean and variance
+        batch_mean = np.mean(x, axis=0)
+        batch_variance = np.var(x, axis=0)
+
+        # Normalize the batch
+        x_normalized = (x - batch_mean) / np.sqrt(batch_variance)
+
+        # Scale and shift
+        y = self.gamma * x_normalized + self.beta
+
+        # Update running mean and variance using momentum
+        self.running_mean = self.alpha * self.running_mean + (1 - self.alpha) * batch_mean
+        self.running_variance = self.alpha * self.running_variance + (1 - self.alpha) * batch_variance
+
+        # Cache values for backward pass
+        cache = (x, x_normalized, batch_mean, batch_variance)
+        return y, cache
 
     def _forward_evaluation(self, x):
-        raise NotImplementedError()
+        # Normalize using the running mean and variance
+        x_normalized = (x - self.running_mean) / np.sqrt(self.running_variance)
+
+        # Scale and shift
+        y = self.gamma * x_normalized + self.beta
+
+        return y, None
 
     def backward(self, output_grad, cache):
-        raise NotImplementedError()
+        x, x_normalized, batch_mean, batch_variance = cache
+
+        N = x.shape[0]
+
+        # Gradient wrt beta and gamma
+        dgamma = np.sum(output_grad * x_normalized, axis=0)
+        dbeta = np.sum(output_grad, axis=0)
+
+        # Gradient wrt normalized input
+        dx_normalized = output_grad * self.gamma
+
+        # Gradient wrt variance
+        dvariance = np.sum(dx_normalized * (x - batch_mean) * -0.5 * np.power(batch_variance, -1.5), axis=0)
+
+        # Gradient wrt mean
+        dmean = np.sum(dx_normalized * -1.0 / np.sqrt(batch_variance), axis=0) + dvariance * np.mean(-2.0 * (x - batch_mean), axis=0)
+
+        # Gradient wrt input
+        dx = (dx_normalized / np.sqrt(batch_variance)) + (dvariance * 2.0 * (x - batch_mean) / N) + (dmean / N)
+
+        return dx, {'gamma': dgamma, 'beta': dbeta}
+
+    def train(self):
+        """Set the layer to training mode."""
+        self.is_training = True
+
+    def eval(self):
+        """Set the layer to evaluation mode."""
+        self.is_training = False
 
 
 class Sigmoid(Layer):
@@ -172,15 +237,12 @@ class ReLU(Layer):
             for i, sample in enumerate(cache):
                 output_temp = []
                 for j, value in enumerate(sample):
-                    print(f'The value is : {value}')
                     if value < 0:
                         temp = 0
                         output_temp.append(temp)
                     else:
-                        print(f'The output_grad value is: {output_grad[i][j]}')
                         temp = 1 * output_grad[i][j]
                         output_temp.append(temp)
-                    print(f'The output value is: {output_temp}')
                 output.append(output_temp)
 
         return np.array(output), cache
