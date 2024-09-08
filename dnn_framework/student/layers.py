@@ -63,16 +63,17 @@ class FullyConnectedLayer(Layer):
         """
         Backward pass of the network
         """
-        dl_dx = np.dot(self.w.T, output_grad)
-        dl_dw = np.dot(output_grad, cache)
-        dl_db = np.sum(output_grad, axis=1, keepdims=True)
+        x = cache
+        dl_dx = np.dot(output_grad, self.w)
+        dl_dw = np.dot(output_grad.T, x)
+        dl_db = np.sum(output_grad, axis=0, keepdims=True)
 
         gradients = {
             'w': dl_dw,
             'b': dl_db
         }
 
-        return dl_dx.T, gradients
+        return dl_dx, gradients
 
 
 class BatchNormalization(Layer):
@@ -230,10 +231,10 @@ class ReLU(Layer):
     """
 
     def get_parameters(self):
-        raise NotImplementedError()
+        return {}
 
     def get_buffers(self):
-        raise NotImplementedError()
+        return {}
 
     def forward(self, x):
         relu = np.maximum(0, x)
@@ -243,7 +244,7 @@ class ReLU(Layer):
 
     def backward(self, output_grad, cache):
         input_grad = output_grad * (cache > 0)
-        return input_grad, cache
+        return input_grad, {}
 
 # class FullyConnectedLayer(Layer):
 #     """
