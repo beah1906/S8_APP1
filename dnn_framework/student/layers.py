@@ -58,12 +58,12 @@ class BatchNormalization(Layer):
 
     def __init__(self, input_count, alpha=0.1):
         # Learnable parameters:
-        self.gamma = np.ones((input_count,))
-        self.beta = np.zeros((input_count,))
+        self.gamma = np.ones((1,input_count))
+        self.beta = np.zeros((1,input_count))
 
         # Buffers for running mean and variance : Inference
-        self.running_mean = np.zeros((input_count,))
-        self.running_variance = np.ones((input_count,))
+        self.running_mean = np.zeros((1,input_count))
+        self.running_variance = np.ones((1,input_count))
 
         # Momentum used for calculating mean and variance : Inference
         self.alpha = alpha
@@ -85,8 +85,8 @@ class BatchNormalization(Layer):
 
     def _forward_training(self, x):
         # Compute batch mean and variance
-        batch_mean = np.mean(x, axis=0)
-        batch_variance = np.var(x, axis=0)
+        batch_mean = np.mean(x)
+        batch_variance = np.var(x)
 
         # Normalize the batch
         x_normalized = (x - batch_mean) / np.sqrt(batch_variance)
@@ -117,8 +117,8 @@ class BatchNormalization(Layer):
         N = x.shape[0]
 
         # Gradient wrt beta and gamma
-        dgamma = np.sum(output_grad * x_normalized, axis=0)
-        dbeta = np.sum(output_grad, axis=0)
+        dgamma = np.sum(output_grad * x_normalized, axis=0, keepdims=True)
+        dbeta = np.sum(output_grad, axis=0, keepdims=True)
 
         # Gradient wrt normalized input
         dx_normalized = output_grad * self.gamma
@@ -174,14 +174,14 @@ class ReLU(Layer):
         There are no learnable parameters in ReLU activation function, so simply
         return an empty string.
         """
-        return None
+        return {}
 
     def get_buffers(self):
         """
         There are no trainable data for ReLU activation function, so simply
         return an empty string.
         """
-        raise None
+        return {}
 
     def forward(self, x):
         """
