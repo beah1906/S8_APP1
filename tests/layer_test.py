@@ -22,7 +22,6 @@ class LayerTestCase(unittest.TestCase):
         self.assertTrue(test_layer_parameter_grad(FullyConnectedLayer(4, 10), (2, 4), 'b'))
 
     def test_batch_normalization_forward_training(self):
-        print(f'Testing the forward training batch normalization')
         layer = BatchNormalization(2)
         layer.get_parameters()['gamma'][:] = np.array([1, 2])
         layer.get_parameters()['beta'][:] = np.array([-1, 1])
@@ -42,7 +41,6 @@ class LayerTestCase(unittest.TestCase):
         layer.get_parameters()['beta'][:] = np.array([-1, 1])
 
         x = np.array([[-1, -2], [1, -1], [0, -1.5]])
-        print(f'Before entering x is: {x.shape}')
         y, _ = layer.forward(x)
 
         expected_y = np.array([[-2.10668124, -0.56508266], [0.10668124, 2.56508266], [-1.0, 1.0]])

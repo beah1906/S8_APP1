@@ -31,8 +31,8 @@ def test_layer_input_grad(layer, input_shape, delta=DELTA):
 
         it.iternext()
 
-    print(f'The analytical_grad is : {analytical_grad}')
-    print(f'The numerical_grad is : {numerical_grad}')
+    print(f'The calculated value is of shape: {analytical_grad.shape}')
+    print(f'The expected value is of shape: {numerical_grad.shape}')
 
     error = np.mean(np.abs(analytical_grad - numerical_grad))
     print(inspect.stack()[1][3], '- Absolute mean error:', error)
