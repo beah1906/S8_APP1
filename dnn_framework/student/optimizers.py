@@ -7,11 +7,13 @@ class SgdOptimizer(Optimizer):
     """
 
     def __init__(self, parameters, learning_rate=0.01):
+        super().__init__(parameters)
         self._learning_rate = learning_rate
-        self._parameters = parameters
+
 
 
     def _step_parameter(self, parameter, parameter_grad, parameter_name):
         updated_parameter = parameter - self._learning_rate * parameter_grad
+        # self._parameters[parameter_name] = updated_parameter
+        return updated_parameter
 
-        self._parameters[parameter_name] = updated_parameter
