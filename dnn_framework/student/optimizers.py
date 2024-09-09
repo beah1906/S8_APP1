@@ -13,6 +13,5 @@ class SgdOptimizer(Optimizer):
 
     def _step_parameter(self, parameter, parameter_grad, parameter_name):
         updated_parameter = parameter - self._learning_rate * parameter_grad
-        piss = self._parameters[parameter_name]
-        print(self._parameters)
+
         self._parameters[parameter_name] = updated_parameter

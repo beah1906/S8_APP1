@@ -22,6 +22,7 @@ class FullyConnectedLayer(Layer):
         #self.w = np.random.randn(output_count, input_count) * 0.01  # Weight initialization with small values
         self.b = np.zeros((output_count,))  # Bias initialization with zeros
 
+
     def get_parameters(self):
         """
         Returns the learnable parameters (weights and biases).
@@ -55,7 +56,7 @@ class FullyConnectedLayer(Layer):
         x = cache
         dl_dx = np.dot(output_grad, self.w)
         dl_dw = np.dot(output_grad.T, x)
-        dl_db = np.sum(output_grad, axis=0, keepdims=False)
+        dl_db = np.sum(output_grad, axis=0, keepdims=True)
 
         gradients = {
             'w': dl_dw,
