@@ -15,12 +15,10 @@ class CrossEntropyLoss(Loss):
         :return A tuple containing the loss and the gradient with respect to the input (loss, input_grad)
         """
         soft = softmax(x)
-        N = x.shape[0]  # Number of samples
-        correct_class_probs = soft[np.arange(N), target]  # Pick the correct class probabilities
-        loss = -np.mean(np.log(correct_class_probs))  # Average cross-entropy loss ????????? not sum
 
-        soft[np.arange(N), target] -= 1  # Subtract 1 from the correct class probabilities
-        input_grad = soft / N  # Normalize the gradient by the batch size
+        target_one_hot = np.eye(x.shape[1])[target]
+        loss = -np.mean(np.sum(target_one_hot * np.log(soft + 1e-15), axis=1))
+        input_grad = (soft - target_one_hot) / x.shape[0]
 
         return loss, input_grad
 
@@ -33,8 +31,12 @@ def softmax(x):
     """
 
     #return (np.e**x)/np.sum(np.e**x)
-    return np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
+    #return np.exp(x-np.max(x, axis=1, keepdims=True)) / np.sum(np.exp(x), axis=1, keepdims=True)
+    shifted_logits = x - np.max(x, axis=1, keepdims=True)
+    exp_scores = np.exp(shifted_logits)
+    soft = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 
+    return soft
 
 class MeanSquaredErrorLoss(Loss):
     """
@@ -47,6 +49,8 @@ class MeanSquaredErrorLoss(Loss):
         :param target: The target tensor (shape: same as x)
         :return A tuple containing the loss and the gradient with respect to the input (loss, input_grad)
         """
-        loss = np.sum((x - target) ** 2) / x.size
-        input_grad = 2 * (x - target) / x.size
+        #loss = np.sum((x - target) ** 2) / x.size
+        loss = np.mean((x-target)**2)
+        #input_grad = 2 * (x - target) / x.size
+        input_grad = (2/x.size)*(x-target)
         return loss, input_grad

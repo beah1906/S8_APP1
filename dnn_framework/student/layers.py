@@ -15,6 +15,7 @@ class FullyConnectedLayer(Layer):
         :param input_count: Number of input features
         :param output_count: Number of output features
         """
+        super().__init__()
         limit = np.sqrt(6 / (input_count + output_count))
         self.w = np.random.uniform(-limit, limit, (output_count, input_count))
         #self.biases = np.zeros((output_count, 1))
