@@ -69,18 +69,31 @@ class BatchNormalization(Layer):
 
     def __init__(self, input_count, alpha=0.1):
         # Learnable parameters:
+        """
+        Scale and shift parameters that which are learnable parameters.
+        """
         self.gamma = np.ones((input_count,))
         self.beta = np.zeros((input_count,))
 
         # Buffers for running mean and variance : Inference
+        """
+        Used to keep track of the mean and variance value across multiples batches 
+        when training the neural network. 
+        """
         self.running_mean = np.zeros((input_count,))
         self.running_variance = np.ones((input_count,))
 
         # Momentum used for calculating mean and variance : Inference
+        """
+        I think it was not mandatory for the class...
+        """
         self.alpha = alpha
 
         # Flag to indicate whether the layer is in training mode or evaluation mode
         self.is_training = True
+
+        # Safety when doing a division to avoid division by 0.
+        self.safety = 1e-07
 
     def get_parameters(self):
         return {'gamma': self.gamma, 'beta': self.beta}
@@ -89,12 +102,21 @@ class BatchNormalization(Layer):
         return {'global_mean': self.running_mean, 'global_variance': self.running_variance}
 
     def forward(self, x):
+        """
+        Batch normalization has a different behaviour for training and evaluation, this is why we separate
+        the forward into two functions called with a flag.
+        """
         if self.is_training:
             return self._forward_training(x)
         else:
             return self._forward_evaluation(x)
 
     def _forward_training(self, x):
+        """
+        Training batch normalization:
+        - Use the current batch to calculate the mean and variance.
+        - The model is currently being trained which mean that the learnable parameters are changed
+        """
         # Put the input data over one axis
         # print(f'Forward : Doing the batch normalization')
         # Compute batch mean and variance
@@ -102,12 +124,19 @@ class BatchNormalization(Layer):
         batch_variance = np.var(x, axis=0)
 
         # Normalize the batch
-        x_normalized = (x - batch_mean) / np.sqrt(batch_variance)
+        x_normalized = (x - batch_mean) / (np.sqrt(batch_variance) + self.safety)
 
         # Scale and shift
         y = self.gamma * x_normalized + self.beta
 
         # Update running mean and variance using momentum
+        """
+        Keep the running mean and running variance in memory for when we are doing the inference. 
+        - When doing the inference we are using this parameters. 
+        - In the equation alpha is the momentum (How much of the previous value are retained)
+        - The values are dynamically changed during the training to giving more weights to recent values
+          while pass values are keep in memory with less importance. 
+        """
         self.running_mean = self.alpha * self.running_mean + (1 - self.alpha) * batch_mean
         self.running_variance = self.alpha * self.running_variance + (1 - self.alpha) * batch_variance
 
@@ -117,7 +146,7 @@ class BatchNormalization(Layer):
 
     def _forward_evaluation(self, x):
         # Normalize using the running mean and variance
-        x_normalized = (x - self.running_mean) / np.sqrt(self.running_variance)
+        x_normalized = (x - self.running_mean) / (np.sqrt(self.running_variance) + self.safety)
 
         # Scale and shift
         y = self.gamma * x_normalized + self.beta
