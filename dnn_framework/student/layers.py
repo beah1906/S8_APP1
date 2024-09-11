@@ -10,9 +10,12 @@ class FullyConnectedLayer(Layer):
 
     def __init__(self, input_count, output_count):
         #Initialize the weights with small random values, to prevent from vanishing gradient or exploding gradient Xavier initializer
-        limit = np.sqrt(6 / (input_count + output_count))
-        self.weights = np.random.uniform(-limit, limit, (output_count, input_count))
-        self.biases = np.zeros((output_count))
+
+        variance_w = 2 / (input_count + output_count)
+        self.weights = np.random.randn(output_count, input_count) * np.sqrt(variance_w)
+
+        variance_b = 2 / output_count
+        self.biases = np.random.randn(1, output_count) * np.sqrt(variance_b)
 
     def get_parameters(self):
         """
