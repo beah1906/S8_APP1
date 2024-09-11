@@ -33,7 +33,6 @@ class FullyConnectedLayer(Layer):
         """
         Forward pass of the network
         """
-        # print(f'Forward : Doing the fully connected:')
 
         dot_product = np.dot(x, self.weights.T)
         y = dot_product + self.biases
@@ -45,17 +44,11 @@ class FullyConnectedLayer(Layer):
         """
         Backward pass of the network
         """
-        # print(f'Backward : Doing the fully connected:')
-
-        # print(f'The shape for the output_grad is: {output_grad.shape}')
-        # print(f'The shape for the cache is: {cache.shape}')
-        # print(f'The shape for the weights is: {self.weights.shape}')
 
         dl_dx = np.dot(output_grad, self.weights)
         # Put the output grad to the original format (We transposed x for the forward pass.)
         dl_dw = np.dot(output_grad.T, cache)
         dl_db = np.sum(output_grad, axis=0, keepdims=True)
-        # print(f'dl_db dimensions are: {dl_db.shape}')
 
         gradients= {
             'w': dl_dw,
@@ -119,7 +112,6 @@ class BatchNormalization(Layer):
         - The model is currently being trained which mean that the learnable parameters are changed
         """
         # Put the input data over one axis
-        # print(f'Forward : Doing the batch normalization')
         # Compute batch mean and variance
         batch_mean = np.mean(x, axis=0)
         batch_variance = np.var(x, axis=0)
@@ -155,7 +147,6 @@ class BatchNormalization(Layer):
         return y, None
 
     def backward(self, output_grad, cache):
-        # print(f'Backward : Doing the batch normalization')
         x, x_normalized, batch_mean, batch_variance = cache
 
         N = x.shape[0]
@@ -228,7 +219,6 @@ class ReLU(Layer):
 
         But not sure if we can use it for this class.
         """
-        # print(f'Forward : Doing the ReLU')
         output = []
 
         if x.ndim == 1:
@@ -259,7 +249,6 @@ class ReLU(Layer):
         """
         Apply the backward pass for the ReLU activation function.
         """
-        # print(f'Backward : Doing the ReLU')
         output = []
 
         if cache.ndim == 1:
