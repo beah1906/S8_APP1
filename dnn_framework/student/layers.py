@@ -68,6 +68,7 @@ class BatchNormalization(Layer):
     """
 
     def __init__(self, input_count, alpha=0.1):
+        super().__init__()
         # Learnable parameters:
         """
         Scale and shift parameters that which are learnable parameters.
@@ -89,9 +90,6 @@ class BatchNormalization(Layer):
         """
         self.alpha = alpha
 
-        # Flag to indicate whether the layer is in training mode or evaluation mode
-        self.is_training = True
-
         # Safety when doing a division to avoid division by 0.
         self.safety = 1e-07
 
@@ -106,7 +104,7 @@ class BatchNormalization(Layer):
         Batch normalization has a different behaviour for training and evaluation, this is why we separate
         the forward into two functions called with a flag.
         """
-        if self.is_training:
+        if self.is_training():
             return self._forward_training(x)
         else:
             return self._forward_evaluation(x)
@@ -176,14 +174,6 @@ class BatchNormalization(Layer):
         dx = (dx_normalized / np.sqrt(batch_variance)) + (dvariance * 2.0 * (x - batch_mean) / N) + (dmean / N)
 
         return dx, {'gamma': dgamma, 'beta': dbeta}
-
-    def train(self):
-        """Set the layer to training mode."""
-        self.is_training = True
-
-    def eval(self):
-        """Set the layer to evaluation mode."""
-        self.is_training = False
 
 
 class Sigmoid(Layer):
