@@ -44,6 +44,7 @@ class Trainer:
         """
         Train the network.
         """
+        print('We are training the network!')
         os.makedirs(self._output_path, exist_ok=True)
 
         for epoch in range(self._epoch_count):
@@ -66,9 +67,13 @@ class Trainer:
 
         self._network.train()
         for x, target in tqdm(self._training_dataset_loader):
+            #print(f'Entering the forward pass\n')
             y = self._network.forward(x)
+            #print(f'Calculating the loss\n')
             loss, y_grad = self._loss.calculate(y, target)
+            #print(f'Doing the backward pass\n')
             parameter_grads = self._network.backward(y_grad)
+            #print(f'\nDoing the optimizer')
             self._optimizer.step(parameter_grads)
 
             self._measure_training_metrics(loss, y, target)

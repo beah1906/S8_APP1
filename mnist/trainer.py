@@ -10,8 +10,10 @@ from mnist.dataset import MnistDataset
 class MnistTrainer(Trainer):
     def __init__(self, network, learning_rate, epoch_count, batch_size, output_path):
         loss = CrossEntropyLoss()
-        optimizer = SgdOptimizer(network.get_parameters(), learning_rate=learning_rate)
+        parameters = network.get_parameters()
+        optimizer = SgdOptimizer(parameters, learning_rate=learning_rate)
 
+        # Create the set to train, valid and test the network
         training_dataset = MnistDataset('training')
         validation_dataset = MnistDataset('validation')
         test_dataset = MnistDataset('testing')

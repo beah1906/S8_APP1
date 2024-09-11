@@ -11,17 +11,19 @@ def main():
     parser.add_argument('--epoch_count', type=int, help='Choose the epoch count', required=True)
     parser.add_argument('--output_path', type=str, help='Choose the output path', required=True)
 
-    parser.add_argument('--checkpoint_path', type=str, help='Choose the output path', default=None)
+    parser.add_argument('--checkpoint_path', type=str, help='Choose the checkpoint path', default=None)
 
     args = parser.parse_args()
 
     network = create_network(args.checkpoint_path)
+    print(f'The network has been created')
     trainer = MnistTrainer(network, args.learning_rate, args.epoch_count, args.batch_size, args.output_path)
+    print(f'The trainer has ben initialized')
     trainer.train()
 
 
 def create_network(checkpoint_path):
-    layers = []
+    layers = [FullyConnectedLayer(784, 128), BatchNormalization(128, 0.01), ReLU(), FullyConnectedLayer(128, 32), BatchNormalization(32, 0.01), ReLU(), FullyConnectedLayer(32, 10)]
     network = Network(layers)
     if checkpoint_path is not None:
         network.load(checkpoint_path)
